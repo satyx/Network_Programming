@@ -45,6 +45,11 @@ def send(event=None):  # event is passed by binders.
         client_socket.close()
         top.quit()
         sys.exit(1)
+    except BrokenPipeError:
+        print("Broken Pipe Error")
+        client_socket.close()
+        top.quit()
+        sys.exit(1)
     
 
 def on_closing(event=None):
