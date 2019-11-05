@@ -9,13 +9,18 @@ def receive():
     while True:
         #print(4)
         try:
-            client_socket.settimeout(5)
             msg = client_socket.recv(BUFSIZ).decode("utf8")
-            client_socket.settimeout(None)            
+            #client_socket.settimeout(None)            
             if not msg or msg=="{quit}":
                 client_socket.close()
                 top.quit()
                 break
+            elif msg == "Invalid Username":
+                client_socket.close()
+                top.quit()
+                print("Invalid Username. Closing Connection......")
+                break
+                
             else:
                 msg_list.insert(tkinter.END, msg)
         except OSError:  # Possibly client has left the chat.
@@ -52,7 +57,6 @@ if __name__ == "__main__":
     
     HOST = input('Enter host: ')
     PORT = input('Enter port: ')
-    print('host',HOST)
     #print(3)
     if not PORT:
         PORT = 33000
@@ -89,7 +93,6 @@ if __name__ == "__main__":
     try:
         client_socket = socket(AF_INET, SOCK_STREAM)
         client_socket.connect(ADDR)
-        print(client_socket.gettimeout())
 
         receive_thread = Thread(target=receive,daemon=True)
         receive_thread.start()

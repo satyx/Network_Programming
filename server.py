@@ -2,6 +2,8 @@
 import socket
 from threading import Thread
 import sys
+import time
+username = ["Satyam","Rohit","Ashay","Jalaj","Shruti","Biswajit","Mansi"]
 
 def accept_incoming_connections():
     """Sets up handling for incoming clients."""
@@ -19,6 +21,7 @@ def accept_incoming_connections():
         return
 
 
+
 def handle_client(client,client_address):  # Takes client socket as argument.
     """Handles a single client connection."""
 
@@ -27,10 +30,18 @@ def handle_client(client,client_address):  # Takes client socket as argument.
         client.close()
         return
     elif name == "{quit}":
-        client.send(bytes("{quit}", "utf8"))
+        broadcast_selective(bytes("{quit}", "utf8"),[client])
+        #client.send(bytes("{quit}", "utf8"))
         print("%s:%s has disconnected." % client_address)
         client.close()
         return
+    elif name not in username:
+        broadcast_selective(bytes("Invalid Username", "utf8"),[client])
+        client.send(bytes("Invalid Username", "utf8"))
+        print("%s:%s has disconnected." % client_address)
+        client.close()
+        return
+    
     welcome = 'Welcome %s! If you ever want to quit, type {quit} to exit.' % name
     client.send(bytes(welcome, "utf8"))
     msg = "%s has joined the chat!" % name
@@ -43,10 +54,11 @@ def handle_client(client,client_address):  # Takes client socket as argument.
             client.close()
             del clients[client]
             break
+        elif msg == bytes("wish","utf8"):
+            broadcast_selective(b"Hey",[client])
         elif msg != bytes("{quit}", "utf8"):
             broadcast(msg,client_address, name+": ")
         else:
-            print("sup")
             client.send(bytes("{quit}", "utf8"))
             print("%s:%s has disconnected." % client_address)
             client.close()
@@ -70,12 +82,30 @@ def broadcast(msg,client_address=None, prefix=""):  # prefix is for name identif
         del clients[client]
         broadcast(bytes("%s has left the chat." % name, "utf8"))
 
+def broadcast_selective(msg,client_list):
+    invalid_clients=[]
+    for index in range(len(client_list)):
+        try:
+            (client_list[index]).send(msg)
+        except BrokenPipeError:
+            invalid_clients.append(sock)
+            continue
+    for client in invalid_clients:
+        print("%s:%s has disconnected." % client_address)
+        client.close()
+        del clients[client]
+        broadcast(bytes("%s has left the chat." % name, "utf8"))
+
         
 clients = {}
 addresses = {}
 
-HOST = '127.0.0.3'
-PORT = 33000
+if len(sys.argv)!=3:
+    print("Usage:python <filename> <host> <port>")
+    sys.exit(1)
+#HOST = '10.145.233.242'
+HOST = sys.argv[1]
+PORT = int(sys.argv[2])
 BUFSIZ = 1024
 ADDR = (HOST, PORT)
 
