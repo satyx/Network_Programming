@@ -56,12 +56,20 @@ start_connection(host,port,num_conns)
 
 try:
     while True:
-        events = sel.select(timeout=1)
+        print("Infinite Loop")
+        #for x in (sel.get_map()).items():
+        #    print("Hey:",x)
+        
+        events = sel.select(timeout=-1)
         if events:
             for key,mask in events:
+            #    print("key:",key)
+            #    print("mask:",mask)
                 service_connection(key,mask)
         if not sel.get_map():
             break
+        #else:
+        #    print("sel.get_map():",sel.get_map())
 except KeyboardInterrupt:
     print("Caught keyboard interrupt,exitting")
 finally:
