@@ -3,6 +3,8 @@ import socket
 import selectors
 import types
 
+#exploiting github bug
+
 sel = selectors.DefaultSelector()
 
 def accept_wrapper(sock):
